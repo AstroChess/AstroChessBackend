@@ -11,10 +11,15 @@
 
 namespace Net {
 
+enum AddressFamily {
+    Ipv4 = AF_INET
+};
+
+enum Protocol {
+    TCP = SOCK_STREAM
+};
+
 class Socket {
-    int domain = AF_INET;
-    int type = SOCK_STREAM;
-    int protocol = 0;
     int socket_desc;
     int client_sock;
     int read_size;
@@ -26,7 +31,7 @@ class Socket {
     void _accept();
     void _receive();
 public:
-    Socket();
+    Socket(AddressFamily af, Protocol proto, int port);
     void open();
 };
 

@@ -2,11 +2,11 @@
 
 using namespace Net;
 
-Socket::Socket() {
-    this->socket_desc = socket(this->domain, this->type, this->protocol);
-    this->server.sin_family = AF_INET;
+Socket::Socket(AddressFamily af, Protocol proto, int port) {
+    this->socket_desc = socket(af, proto, 0);
+    this->server.sin_family = af;
     this->server.sin_addr.s_addr = INADDR_ANY;
-    this->server.sin_port = htons(8080);
+    this->server.sin_port = htons(port);
 }
 
 void Socket::_bind() {
