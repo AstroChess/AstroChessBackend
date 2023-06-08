@@ -1,4 +1,5 @@
 #include "http_lexer.h"
+#include "vector.h"
 
 #define CMD_ARG_LEN 2
 #define BUFFER_SIZE 4096
@@ -25,8 +26,14 @@ int main(int argc, char **argv) {
     CmdArgParser cmd = CmdArgParser(argc, argv, buf);
 
     using namespace Net;
-    HttpLexer::Token token = HttpLexer::Token(HttpLexer::TokenType::ACTION, "GET", 1);
-    printf("{ ID: 1, %s }\n", token.to_string());
+    HttpLexer::Scanner scanner = HttpLexer::Scanner(buf);
+
+    Vector<int> vec = Vector<int>();
+    vec.push(1);
+    vec.push(2);
+    vec.push(3);
+    vec.push(4);
+    printf("%i\n", vec[4]);
 
     return 0;
 }
