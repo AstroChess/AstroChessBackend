@@ -1,8 +1,9 @@
-#include "net.h"
+#include "http_lexer.h"
 
 int main() {
-    Net::Socket socket = Net::Socket(Net::AddressFamily::Ipv4, Net::Protocol::TCP, 9000);
-    socket.open();
+    using namespace Net;
+    HttpLexer::Token token = HttpLexer::Token(HttpLexer::TokenType::ACTION, "GET", 1);
+    printf("{ ID: 1, %s }\n", token.to_string());
 
     return 0;
 }

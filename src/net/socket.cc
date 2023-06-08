@@ -27,7 +27,8 @@ void Socket::_accept() {
 
 void Socket::_receive() {
     while((this->read_size = recv(this->client_sock, this->buffer, BUFFER_SIZE, 0)) > 0) {
-        printf("%s\n", this->buffer);
+        /* printf("%s\n", this->buffer); */
+        HttpDecoder::Decode(this->buffer);
     }
 }
 

@@ -2,6 +2,8 @@
 #define NET_NET_H
 
 #define BUFFER_SIZE 1024
+#define HTTP_PATH_SIZE 128
+#define HTTP_VERSION 1.1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,6 +35,26 @@ class Socket {
 public:
     Socket(AddressFamily af, Protocol proto, int port);
     void open();
+};
+
+enum HttpAction {
+    Get,
+    Post
+};
+
+class HttpRequest {
+    HttpAction action;
+    char path[HTTP_PATH_SIZE];
+    char host[64];
+public:
+    HttpRequest(HttpAction action, char *path, char *host);
+    void into_string(char *dest);
+};
+
+namespace HttpDecoder {
+
+void Decode(char *src);
+
 };
 
 }
