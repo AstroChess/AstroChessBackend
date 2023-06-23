@@ -1,6 +1,8 @@
 #include <stdio.h>
+#include <string.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <unistd.h>
 
 enum SOCKET_STATUS {
 	SUCCESS,
@@ -8,6 +10,73 @@ enum SOCKET_STATUS {
 	BIND_FAILED,
 	LISTEN_FAILED,
 	ACCEPT_FAILED
+};
+
+enum HttpMethod {
+	GET,
+	POST,
+	PUT,
+	DELETE
+};
+
+const char *HttpMethodIdents[] = {
+	"GET",
+	"POST",
+	"PUT",
+	"DELETE"
+};
+
+struct HttpRequest {
+	enum HttpMethod method;
+	char path[16];
+	char version[16];
+};
+
+void http_request_init(struct HttpRequest *hr, char *str) {
+	char lexemes[3][16];
+	int j = 0;
+	int k = 0;
+	for(int i = 0; str[i] != 0; i++) {
+		if(str[i] == '\r' || str[i] == '\n') {
+			lexemes[j][k] = '\0';
+			j += 1;
+			break;
+		} else if(str[i] == ' ') {
+			lexemes[j][k] = '\0';
+			j += 1;
+			k = 0;
+		} else {
+			lexemes[j][k] = str[i];
+			k += 1;
+		}
+	}
+	if(strcmp(lexemes[0], "GET") == 0) {
+		hr->method = GET;
+	} else if(strcmp(lexemes[0], "POST") == 0) {
+		hr->method = POST;
+	} else if(strcmp(lexemes[0], "PUT") == 0) {
+		hr->method = PUT;
+	} else if(strcmp(lexemes[0], "DELETE") == 0) {
+		hr->method = DELETE;
+	}
+	strcpy(hr->path, lexemes[1]);
+	strcpy(hr->version, lexemes[2]);
+}
+
+void http_request_print(struct HttpRequest *hr) {
+	printf("{ Method: %s, Path: %s, Version: %s }\n", HttpMethodIdents[hr->method], hr->path, hr->version);
+}
+
+struct Route {
+	enum HttpMethod method;
+	const char *path;
+	void (*func)();
+};
+
+void say_hello() { printf("Hello from route\n"); }
+
+static struct Route Routes[] = {
+	{ .method = GET, .path = "/hello", .func = &say_hello }
 };
 
 int atoi(char *str) {
@@ -27,6 +96,7 @@ int atoi(char *str) {
 
 enum SOCKET_STATUS socket_listener_open(int port) {
 	int sockfd, clientfd;
+	char buf[1024];
 	struct sockaddr_in addr, client;
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(port);
@@ -38,8 +108,11 @@ enum SOCKET_STATUS socket_listener_open(int port) {
 	printf("Listenning for connections on port %i...\n", port);
 	int len = sizeof(client);
 	while(clientfd = accept(sockfd, (struct sockaddr *) &client, &len)) {
-		if(clientfd < 0) { break; return ACCEPT_FAILED; }
 		printf("Accepted connection\n");
+		int valread = read(clientfd, buf, 1024);
+		struct HttpRequest req;
+		http_request_init(&req, buf);
+		http_request_print(&req);
 	}
 	return 0;
 }
