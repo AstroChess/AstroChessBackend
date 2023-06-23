@@ -26,8 +26,8 @@ int atoi(char *str) {
 }
 
 enum SOCKET_STATUS socket_listener_open(int port) {
-	int sockfd;
-	struct sockaddr_in addr;
+	int sockfd, clientfd;
+	struct sockaddr_in addr, client;
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(port);
 	addr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -35,6 +35,12 @@ enum SOCKET_STATUS socket_listener_open(int port) {
 	if(sockfd == -1) { return CREATE_FAILED; }
 	if(bind(sockfd, (struct sockaddr *) &addr, sizeof(addr)) != 0) { return BIND_FAILED; }
 	if(listen(sockfd, 4) != 0) { return LISTEN_FAILED; }
+	printf("Listenning for connections on port %i...\n", port);
+	int len = sizeof(client);
+	while(clientfd = accept(sockfd, (struct sockaddr *) &client, &len)) {
+		if(clientfd < 0) { break; return ACCEPT_FAILED; }
+		printf("Accepted connection\n");
+	}
 	return 0;
 }
 
@@ -50,6 +56,9 @@ int main(int argc, char **argv) {
 			return 1;
 		case LISTEN_FAILED:
 			printf("Failed to listen on socket\n");
+			return 1;
+		case ACCEPT_FAILED:
+			printf("Failed to accept connection\n");
 			return 1;
 	}
 
